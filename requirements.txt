@@ -1,0 +1,5 @@
+pip==21.1
+fastapi[all]
+setuptools==56.0.0
+dnspython
+
