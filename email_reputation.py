@@ -11,8 +11,8 @@ with open("disposable.txt", "r") as f2:
     disposable = [line.rstrip() for line in f2]
     print(disposable)
 
-dns.resolver.default_resolver = dns.resolver.Resolver(configure=True)
-# dns.resolver.default_resolver.nameservers = ['8.8.8.8']
+dns.resolver.default_resolver = dns.resolver.Resolver(configure=False)
+dns.resolver.default_resolver.nameservers = ['8.8.8.8']
 dns.resolver.default_resolver.timeout = 20
 
 
@@ -22,16 +22,16 @@ async def root():
 
 
 @email_lookup.get("/rolebased/{email_address}")
-async def read_item(email_address: str):
+async def rolebased(email_address: str):
     email_address_to_search = email_address.split("@", 1)[0]
     for role in roles:
         if email_address_to_search == role:
-            return {"is_role_based": True}
+            return {email_address: "is_role_based"}
     return {"is_role_based": False}
 
 
 @email_lookup.get("/disposable/{email_address}")
-async def read_item(email_address: str):
+async def disposable(email_address: str):
     email_address_to_search = email_address.split("@", 1)[1]
     for dispose in disposable:
         if email_address_to_search == dispose:
@@ -40,7 +40,7 @@ async def read_item(email_address: str):
 
 
 @email_lookup.get("/check_mx/{email_address}")
-async def read_item(email_address: str):
+async def check_mx(email_address: str):
     print(email_address)
     print(email_address.split("@", 1)[1])
     try:
