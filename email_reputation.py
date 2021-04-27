@@ -1,4 +1,5 @@
 import dns.resolver
+import uvicorn
 from fastapi import FastAPI
 
 email_lookup = FastAPI()
@@ -40,19 +41,28 @@ async def disposable(email_address: str):
 
 
 @email_lookup.get("/check_mx/{email_address}")
-async def check_mx(email_address: str):
+def check_mx(email_address: str):
     print(email_address)
     print(email_address.split("@", 1)[1])
     try:
-        print("here")
-        answers = dns.resolver.default_resolver.resolve(email_address.split("@", 1)[1], 'MX')
-        print(answers)
+        response_output = dns.resolver.default_resolver.query(email_address.split("@", 1)[1], 'MX').response.answer[0][
+            0].exchange
+        return {"MX_Record": "OK", "MX_value": str(response_output)}
     except dns.resolver.NoAnswer:
-        answers = {"MX_record": "No answer"}
+        return {"MX_record": "No answer"}
     except dns.resolver.Timeout:
-        answers = {"MX_Record": "Timeout"}
-    else:
-        answers = {"MX_Record": "OK"}
-    finally:
-        print(answers)
-        return answers
+        return {"MX_Record": "Timeout"}
+    except dns.resolver.NXDOMAIN:
+        return {"MX_Record": "DNS name does not exist"}
+
+
+@email_lookup.get("/check_all/{email_address}")
+async def check_all(email_address: str):
+    a = (disposable(email_address)
+         b = str(rolebased(email_address))
+    c = str(check_mx(email_address))
+    return {"a": a, "b": b, "c": c}
+
+
+if __name__ == "__main__":
+    uvicorn.run(email_lookup, host="localhost", port=8000)
